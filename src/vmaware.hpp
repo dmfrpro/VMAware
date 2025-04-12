@@ -31,10 +31,10 @@
  * - struct for internal cpu operations        => line 747
  * - struct for internal memoization           => line 1218
  * - struct for internal utility functions     => line 1342
- * - struct for internal core components       => line 10064
+ * - struct for internal core components       => line 10069
  * - start of VM detection technique list      => line 2343
- * - start of public VM detection functions    => line 10728
- * - start of externally defined variables     => line 11677
+ * - start of public VM detection functions    => line 10733
+ * - start of externally defined variables     => line 11682
  *
  *
  * ============================== EXAMPLE ===================================
@@ -7556,14 +7556,16 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             size_t length;       
         };
 
-        constexpr std::array<VMGpuInfo, 7> vm_gpu_names = { {
+        constexpr std::array<VMGpuInfo, 9> vm_gpu_names = { {
             { L"VMware SVGA 3D",                   brands::VMWARE,   14 },
             { L"VirtualBox Graphics Adapter",      brands::VBOX,     27 },
             { L"QXL GPU",                          brands::KVM,      7 },
             { L"VirGL 3D",                         brands::QEMU,     8 },
             { L"Microsoft Hyper-V Video",          brands::HYPERV,   23 },
             { L"Parallels Display Adapter (WDDM)", brands::PARALLELS, 32 },
-            { L"Bochs Graphics Adapter",           brands::BOCHS,    22 }
+            { L"Bochs Graphics Adapter",           brands::BOCHS,    22 },
+            { L"Virtual Display Driver",           brands::NULL_BRAND,  22 },
+            { L"IddSampleDriver Device",           brands::NULL_BRAND,  22 }
         } };
 
         DISPLAY_DEVICEW dd{};
@@ -7582,8 +7584,11 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 const char* brand = entry.brand;
                 const size_t len = entry.length;
 #endif
-                if (deviceStrLen == len && wcscmp(deviceStr, name) == 0) {                  
-                    return core::add(brand);;
+                if (deviceStrLen == len && wcscmp(deviceStr, name) == 0) {    
+                    PBYTE castedName = (PBYTE)calloc(len, sizeof(BYTE));
+                    size_t ret = wcstombs(castedName, name, len);
+                    castedName[ret] = '\0';              
+                    return core::add(brand);
                 }
             }
 
